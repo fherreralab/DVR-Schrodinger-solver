@@ -24,12 +24,12 @@
 	implicit none
 
 	! Main program variables
-	integer :: NGP, i, j, rot, inputstatus, vmax, NV, v, vp, N, Np, NR, Nomega, PEC, PDM, instatus
+	integer :: NGP, i, j, rot, inputstatus, vmax, NV, v, vp, N, Np, NR, PEC, instatus
 	integer, parameter :: kmax = 5000
 	double precision :: NN, Nmin, Nmax, mass, dissociation_energy, rmin, rmax, step, RMAT(kmax,2)
 	double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
 	double precision, allocatable :: dipole_vibration(:,:), rovib_wavefunctions(:,:,:), rovib_energies(:,:)
-	character :: mol*3, rotational*2, magnetic*4, moment*4, moleculestate*16
+	character :: mol*4
 		
 	! Variables for LAPACK diagonalization
 	double precision, allocatable :: WORK(:), A(:,:)
@@ -52,12 +52,9 @@ print*, 'Reading'
 	read(10,*)!rmin, rmax, step
 	read(10,*) rmin, rmax, step
 	read(10,*)!reduced mass (amu) 	Dissociation Energy (cm-1)
-	read(10,*)! LiCs
-	read(10,*)! RbCs
-	read(10,*) mass, dissociation_energy ! KRb
-	read(10,*)! LiRb
-	read(10,*)! Jmax, vmax, q
-	read(10,*) Nmax, vmax, q
+	read(10,*) mass, dissociation_energy ! LiCs
+	read(10,*)! Jmax, vmax
+	read(10,*) Nmax, vmax
 
 	! Molecule verification
 
