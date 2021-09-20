@@ -24,11 +24,11 @@
 	implicit none
 
 	! Main program variables
-	integer :: NGP, i, j, rot, inputstatus, vmax, NV, v, vp, N, Np, NR, PEC, instatus
+	integer :: NGP, i, j, rot, instatus, vmax, NV, NR, PEC
 	integer, parameter :: kmax = 5000
-	double precision :: NN, Nmin, Nmax, mass, dissociation_energy, rmin, rmax, step, RMAT(kmax,2)
+	double precision :: NN, Nmax, mass, rmin, rmax, step, RMAT(kmax,2)
 	double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
-	double precision, allocatable :: dipole_vibration(:,:), rovib_wavefunctions(:,:,:), rovib_energies(:,:)
+	double precision, allocatable :: rovib_wavefunctions(:,:,:), rovib_energies(:,:)
 	character :: mol*4
 		
 	! Variables for LAPACK diagonalization
@@ -43,42 +43,26 @@
 		
 	real*8 threejsymbol
 	
-	! Read input
-
-print*, 'Reading'
-
-	open(10,file='rovib_pp.in')
+!-----------------------------------------------------------------------------------------------------------------
 	
-	read(10,*)!rmin, rmax, step
-	read(10,*) rmin, rmax, step
-	read(10,*)!reduced mass (amu) 	Dissociation Energy (cm-1)
-	read(10,*) mass, dissociation_energy ! LiCs
-	read(10,*)! Jmax, vmax
-	read(10,*) Nmax, vmax
+	! Setting initial parameters for LiCs
 
-	! Molecule verification
+print*, 'Setting parameters for LiCs'
 
-	if (dabs(dissociation_energy-5875.455).lt.1.d-3) then
-	mol = 'LiCs'
-	else if (dabs(dissociation_energy-3836.1).lt.1.d-3) then
-	mol = 'RbCs'
-	else if (dabs(dissociation_energy-4217.91).lt.1.d-3) then
-	mol = 'KRb'
-	else if (dabs(dissociation_energy-5927.9).lt.1.d-3) then
-	mol = 'LiRb'
-	else
-	STOP 'Error: molecule specification not recognized'
-	end if
+	mol = 'LiCs'						! molecule name
+	rmin = 4d0						! in Bohr radius
+	rmax = 50d0						! in Bohr radius
+	step = 0.01d0						! in Bohr radius
+	mass = 6.664204432					! in amu units
+	Nmax = 10						! maximum rotational angular momentum number N
+	vmax = 16						! maximum vibrational number v
 
-print*, mol
-
-	if ((rmax.gt.300.d0).or.(rmin.lt.5.d0)) stop 'Error: grid boundaries outside potential interval!'
+	if ((rmax.gt.515.d0).or.(rmin.lt.4.d0)) stop 'Error: grid boundaries outside potential interval!'
 
 	! Convertion to atomic units
 	
 	mass = amu_to_au(mass)
-	dissociation_energy = wavenumber_to_hartree(dissociation_energy)
-	
+
 	! Define parameters
 	
 	NGP = nint(dabs(rmax-rmin)/step) + 1			! number of grid points
@@ -87,13 +71,15 @@ print*, mol
 
 	! Read potential curve
 
+print*, 'Reading potential energy curve'
+
 	open(20,file=mol//'_PEC.in')
 
 	mesh=0
 	do
 		mesh = mesh + 1
-		read(20,*,iostat=inputstatus) (RMAT(mesh,j), j = 1, 2)
-		if (inputstatus.lt.0) exit
+		read(20,*,iostat=instatus) (RMAT(mesh,j), j = 1, 2)
+		if (instatus.lt.0) exit
 	end do
 
 	PEC = mesh - 1
@@ -104,20 +90,19 @@ print*, mol
 	allocate(knots(PEC,2))
 
 	do i=1, PEC
-		knots(i,1)= RMAT(i,1)			     ! Already in au
-		knots(i,2)= wavenumber_to_hartree(RMAT(i,2)) ! Convert to atomic units
+		knots(i,1)= RMAT(i,1)				! Already in au
+		knots(i,2)= wavenumber_to_hartree(RMAT(i,2))	! Convert to atomic units
 	end do
 
-print*, 'Cubicspline potential'
-
-	call cubicsplines(knots,PEC,0.d0,0.d0,moments) ! Compute moments
+	call cubicsplines(knots,PEC,0.d0,0.d0,moments)		! Compute moments
 
 	! Construction of the DVR Hamiltonian
+	
+print*, 'Construction of the DVR Hamiltonian'
 	
 	allocate(grid(NGP))
 	allocate(potential(NGP))
 	allocate(hamiltonian(NGP,NGP))			
-	allocate(dipole_vibration(NV,NV))	
 	allocate(rovib_wavefunctions(NR,NGP,NV))
 	allocate(rovib_energies(NR,NV))
 	LWORK = 1 + 6 * NGP + 2 * NGP**2
@@ -132,17 +117,15 @@ print*, 'Cubicspline potential'
 
 print*, 'Begin DVR'
 
-	do rot = 1, NR ! Begin loop over rotational states
+	do rot = 1, NR 									! Begin loop over rotational states
 
-		Nn = (rot-1)
-
-print*, Nn
+		NN = (rot-1)
 
 		do i = 1, NGP
 			x = rmin + dble(i-1)*step
 			grid(i) = x							! Set up uniform grid
 			call splineinterpol(knots,moments,PEC,x,y) 	
-			potential(i) = y + Nn*(Nn+1.d0)/(2.d0*mass*grid(i)*grid(i))	! Interpolated electronic + rotational
+			potential(i) = y + NN*(NN+1.d0)/(2.d0*mass*grid(i)*grid(i))	! Interpolated electronic + rotational
 		end do
 		
 		! Evaluate DVR kinetic + potential energies (in atomic units)
@@ -161,7 +144,7 @@ print*, Nn
 
 		! Write eigenvectors to 3D array
 		
-		do i = 1,NGP
+		do i = 1, NGP
 			do j = 1, NV			
 			rovib_wavefunctions(rot,i,j) = eigenvectors(i,j)
 			end do
@@ -179,7 +162,6 @@ print*, 'End DVR'
 	deallocate(moments)
 
 end program rovib
-
 
 !==================================================================================================================================================
 !==================================================================================================================================================
@@ -272,11 +254,11 @@ end program rovib
 	a = 0.18469891d3 	! Y1,0 = w
 	b = -0.10002506d1	! Y2,0 = -wx
 	c = -0.13394d-2 	! Y3,0 = wy
-	d = -0.6965d-4	! Y4,0
-	e = -0.65721d-9	! Y7,0
-	f = 0.163d-13	! Y10,0
-	g = -0.499d-15	! Y11,0
-	h = 0.443d-17	! Y12,0
+	d = -0.6965d-4		! Y4,0
+	e = -0.65721d-9		! Y7,0
+	f = 0.163d-13		! Y10,0
+	g = -0.499d-15		! Y11,0
+	h = 0.443d-17		! Y12,0
 		
 	do i = 1, NVS
 		v = dble(i-1)
