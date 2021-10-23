@@ -1,10 +1,10 @@
 # Discrete Variable Representation (DVR) for Rovibrational structure of a closed-shell diatomic molecule
 
-This repository contains code that computes the rovibrational structure of a diatomic molecule in a given closed-shell electronic potential curve. The eigensystem is obtain by using Discrete Variable Representation (DVR).
+This repository contains code that computes the rovibrational structure of a diatomic molecule in a given closed-shell electronic potential curve. The eigensystem is obtained by using Discrete Variable Representation (DVR).
 
 ## Overview
 
-The DVR Hamiltonian for a given potential energy curve + rotational structure is implemented using a Fourier basis and an uniform grid approach, it follows reference [J. Chem. Phys. 96(3) 1982 (1992)](https://aip.scitation.org/doi/10.1063/1.462100). For radial coordinates, the represetation uses eigenfunctions of a particle-in-a-box for a semi-infinite interval (0,infinity) and the mass is included explicitly in the kinetic energy operator.
+The DVR Hamiltonian for a given potential energy curve + rotational structure is implemented using a Fourier basis and an uniform grid approach, it follows reference [J. Chem. Phys. 96(3) 1982 (1992)](https://aip.scitation.org/doi/10.1063/1.462100). For radial coordinates, the represetation uses eigenfunctions of a particle-in-a-box for a semi-infinite interval <img src="https://latex.codecogs.com/gif.latex?(0,\infty)"> and the mass is included explicitly in the kinetic energy operator.
 
 ### Input
   - **Electronic potential energy curve file**: it should have two columns, 1st: radial coordinate and 2nd: potential energy
@@ -33,8 +33,14 @@ In order to run other examples, you must supply the potential energy curve file 
   
 ### How to run it
 
-It can be run normally as a regular fortran program or use Python and run ``f2py -c rovib.f90 -m rovib`` in the terminal
-  
+It can be run normally as a regular Fortran program, or it can be used in Python running Numpy's f2py with the following command:
+
+```
+python3 -m numpy.f2py -c rovib.f90 spline.f90 unit_conversion.f90 integration_double.f90 /usr/lib/x86_64-linux-gnu/lapack/liblapack.so -m rovibpy
+```
+
+[LAPACK](http://www.netlib.org/lapack/) needs to be installed in order to run the command above, and you may have to change the location of the liblapack file if it's located in a different place (check its location by running ``dpkg -L liblapack3``).
+
 ## References
 
 This program was written by Felipe Herrera and modified by Vanessa Olaya as a part of her Master thesis project.
