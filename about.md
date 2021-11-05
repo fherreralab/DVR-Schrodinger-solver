@@ -1,7 +1,7 @@
 # About
 The code contained in this repository solves the following wavefunction which describes the movement of a radial particle. It's a Schrödinger's equation that finds the molecule states when the nuclei and electrons are in specific positions.
 
-<center><img src="https://latex.codecogs.com/gif.latex?\left[-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2 }\right)+\frac{J\left(J+1\right)\hbar^2}{2\mu r^2} + V(r)\right] S(r) = E_{int}S(r)"></center>
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?{\left[-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2%20}\right)+\frac{J\left(J+1\right)\hbar^2}{2\mu%20r^2}+V(r)\right]S(r)=E_{int}S(r)}"></p>
 
 Where:
 - <img src="https://latex.codecogs.com/gif.latex?\hbar">'s value is 1.
@@ -15,18 +15,18 @@ Where:
 ## Analyzing the equation
 In order to understand this equation, we first analyze the following:
 ### Movement
-<center><img src="https://latex.codecogs.com/gif.latex?-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2 }\right)"></center>
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2}\right)"></p>
 
 This the kinetic energy solved numerically with the DVR subroutine, which takes into account a one-dimensional quantum system where <img src="https://latex.codecogs.com/gif.latex?r"> is restricted to a given interval as stated in [ paper ].
 
 ### Rotation
-<center><img src="https://latex.codecogs.com/gif.latex?\frac{J\left(J+1\right)\hbar^2}{2\mu r^2}"></center>
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?\frac{J\left(J+1\right)\hbar^2}{2\mu%20r^2}"></p>
 
 This takes care of the rotational part of our equation and is equivalent to the following Fortran code inside *rovib.f90*: ``NN*(NN+1.d0)/(2.d0*mass*grid(i)*grid(i)``.
 
 ### Vibration
 
-<center><img src="https://latex.codecogs.com/gif.latex?V(r)"></center>
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?V(r)"></p>
 
 This is, as stated earlier, the potential energy curve which is provided in the *LiCs_PEC.in* file.
 
@@ -37,15 +37,14 @@ There should be a file called *[molecule]_PEC.in* in the same folder as the rovi
 
 The Potential Energy Curve is a required input for our code. As an example, we have included the  *LiCs_PEC.in* file which contains these two columns for a LiCs molecule.
 
+<p align="center">[ figure ]</p>
+
 ### DVR matrix subroutine
 
 By doing DVR, we numerically obtain the energy of our molecule's Hamiltonian <img src="https://latex.codecogs.com/gif.latex?H_{mol}">. Following [ paper ]'s Appendix A, which goes through calculating a simple generic DVR step by step, we achieve the following:
 
-<center><img src="https://latex.codecogs.com/gif.latex?-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2 }\right) \longrightarrow \frac{\hbar^2}{2\mu\Delta r^2}(-1)^{i-j}\left\{\begin{array}{lr}
-        \frac{\pi^2}{3}-\frac{1}{2i^2}, & \text{for } i = j\\
-        \frac{2}{(i-j)^2}-\frac{2}{(i+j)^2}, & \text{for } i \neq j
-        \end{array}\right\}"></center>
-with <img src="https://latex.codecogs.com/gif.latex?r_i=i\Delta r"> given <img src="https://latex.codecogs.com/gif.latex?i=1, 2, \dots">.
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?-\frac{\hbar^2}{2\mu}\left(\frac{d^2}{dr^2}\right)\longrightarrow\frac{\hbar^2}{2\mu\Delta%20r^2}(-1)^{i-j}\left\{\begin{array}{lr}\frac{\pi^2}{3}-\frac{1}{2i^2},&\text{for%20}i=j\\\frac{2}{(i-j)^2}-\frac{2}{(i+j)^2},&\text{for%20}i\neq%20j\end{array}\right\}"></p>
+<p align="center">with <img src="https://latex.codecogs.com/gif.latex?r_i=i\Delta%20r"> given <img src="https://latex.codecogs.com/gif.latex?i=1,%202,%20\dots">.</p>
 
 In our subroutine, we obtain a matrix using this formula, where <img src="https://latex.codecogs.com/gif.latex?i"> and <img src="https://latex.codecogs.com/gif.latex?j"> are the matrix's rows and columns respectively. When <img src="https://latex.codecogs.com/gif.latex?i=j">, we're positioned over our matrix's diagional, where the rotational and electronic energy are added as follows:
 
@@ -53,7 +52,7 @@ In our subroutine, we obtain a matrix using this formula, where <img src="https:
 hamiltonian(i,i) = (0.5d0/m)*(step**(-2)) * (pi*pi/3.d0 - 0.5d0/dble(i*i)) + potential(i)
 ```
 
-For the non-diagonal elements where <img src="https://latex.codecogs.com/gif.latex?i\neq j">, only kinetic terms are stored:
+For the non-diagonal elements where <img src="https://latex.codecogs.com/gif.latex?i\neq%20j">, only kinetic terms are stored:
 
 ```@fortran
 hamiltonian(i,j) = (0.5d0/m)*(step**(-2)) * (2.d0/(dble(i-j)**2)-2.d0/(dble(i+j)**2)) * (-1.d0)**(i-j)
