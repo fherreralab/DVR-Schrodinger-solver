@@ -24,11 +24,12 @@ use unit_conversion_library
 implicit none
 
 ! Main program variables
-integer :: NGP, i, rot, instatus, vmax, NV, NR, PEC
+integer :: NGP, i, rot, instatus, NV, NR, PEC
 integer :: j
 integer, parameter :: kmax = 5000
-double precision :: NN, mass, rmin, rmax, step, RMAT(kmax,2)
-double precision :: Nmax
+double precision :: NN, RMAT(kmax,2)
+double precision :: rmin, rmax, step, mass, Nmax
+integer :: vmax
 double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
 double precision, allocatable :: rovib_wavefunctions(:,:,:), rovib_energies(:,:)
 character :: mol*4
@@ -132,7 +133,8 @@ do rot = 1, NR 									! Begin loop over rotational states
 	
 	! Evaluate DVR kinetic + potential energies (in atomic units)
 
-	call DVR_radial(mass,step,NGP,grid,potential,hamiltonian)	
+	call DVR_radial(mass,step,NGP,grid,potential,hamiltonian)
+
 
 	! Diagonalize the Hamiltonian using LAPACK
 
@@ -154,7 +156,6 @@ do rot = 1, NR 									! Begin loop over rotational states
 		
 	do j = 1, NV			
 		rovib_energies(rot,j) = eigenvalues(j)
-		print*, j, eigenvalues(j)
 	end do		
 	
 
@@ -199,7 +200,7 @@ integer interval, i, j, indexA,indexB
 double precision  pi, xmin, x, omega, De, aa, re
 integer :: NGP
 double precision, intent(in) :: m, step, grid(NGP), potential(NGP)
-double precision, intent(inout) :: hamiltonian(NGP,NGP)
+double precision, intent(out) :: hamiltonian(NGP,NGP)
 
 pi = dacos(-1.d0)
 
@@ -211,6 +212,11 @@ do i = 1, NGP
 	end do						
 	hamiltonian(i,i) = (0.5d0/m)*(step**(-2)) * (pi*pi/3.d0 - 0.5d0/dble(i*i)) + potential(i)
 end do	   
+
+! The following loop is left to check if the output Python matrix contains the same values in its diagional
+do i = 1, NGP
+	print*, NGP, hamiltonian(i,i)
+end do
 		
 end subroutine DVR_radial
 

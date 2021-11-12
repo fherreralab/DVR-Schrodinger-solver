@@ -33,7 +33,13 @@ In order to run other examples, you must supply the potential energy curve file 
   
 ### How to run it
 
-It can be run normally as a regular Fortran program, or it can be used in Python running Numpy's f2py with the following command:
+It can be run normally as a regular Fortran program after compilation with:
+
+```
+gfortran -w unit_conversion.f90 spline.f90 integration_double.f90 rovib.f90 -o rovib2 -llapack -lblas
+```
+
+Or it can be used in Python running Numpy's f2py with the following command:
 
 ```
 python3 -m numpy.f2py -c rovib.f90 spline.f90 unit_conversion.f90 integration_double.f90 /usr/lib/x86_64-linux-gnu/lapack/liblapack.so -m rovibpy
