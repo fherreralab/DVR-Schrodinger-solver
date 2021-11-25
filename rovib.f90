@@ -1,5 +1,16 @@
+module rovib
 
-program rovib
+use unit_conversion_library
+implicit none
+double precision, allocatable, public :: rovib_wavefunctions(:,:,:), rovib_energies(:,:)
+private
+save
+
+public :: use_rovib, dvr_radial, dunham, orthonormal_check
+
+CONTAINS
+
+subroutine use_rovib(rmin, rmax, step, mass, NMax, vmax)
 !-----------------------------------------------------------------------------------------------------------------	
 ! 	General program to calculate the rovibrational structure of a diatomic molecule
 !	in a given closed-shell electronic potential curve. E(v,J)
@@ -19,19 +30,14 @@ program rovib
 !						selected rovibrational states. 
 !-----------------------------------------------------------------------------------------------------------------
 
-use unit_conversion_library
-
-implicit none
-
-! Main program variables
-integer :: NGP, i, rot, instatus, NV, NR, PEC
-integer :: j
+! Main variables
+integer :: NGP, i, rot, instatus, NV, NR, PEC, j
 integer, parameter :: kmax = 5000
 double precision :: NN, RMAT(kmax,2)
-double precision :: rmin, rmax, step, mass, Nmax
-integer :: vmax
+double precision, intent(in) :: rmin, rmax, step, Nmax
+double precision, intent(inout) :: mass
+integer, intent(in) :: vmax
 double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
-double precision, allocatable :: rovib_wavefunctions(:,:,:), rovib_energies(:,:)
 character :: mol*4
 	
 ! Variables for LAPACK diagonalization
@@ -52,13 +58,7 @@ real*8 threejsymbol
 
 print*, 'Setting parameters for LiCs'
 
-mol = 'LiCs'						! molecule name
-rmin = 4d0						! in Bohr radius
-rmax = 50d0						! in Bohr radius
-step = 0.01d0						! in Bohr radius
-mass = 6.664204432					! in amu units
-Nmax = 0						! maximum rotational angular momentum number N
-vmax = 16						! maximum vibrational number v
+mol = 'LiCs'
 
 if ((rmax.gt.515.d0).or.(rmin.lt.4.d0)) stop 'Error: grid boundaries outside potential interval!'
 
@@ -166,7 +166,7 @@ print*, 'End DVR'
 deallocate(knots)
 deallocate(moments)
 
-end program rovib
+end subroutine use_rovib
 
 !==================================================================================================================================================
 !==================================================================================================================================================
@@ -214,9 +214,9 @@ do i = 1, NGP
 end do	   
 
 ! The following loop is left to check if the output Python matrix contains the same values in its diagional
-do i = 1, NGP
-	print*, NGP, hamiltonian(i,i)
-end do
+! do i = 1, NGP
+!	print*, NGP, hamiltonian(i,i)
+! end do
 		
 end subroutine DVR_radial
 
@@ -281,3 +281,4 @@ end do
 end subroutine
 		
 !==================================================================================================================================================
+end module rovib

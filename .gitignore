@@ -1,4 +1,4 @@
-rovibpy.cpython-39-x86_64-linux-gnu.so
-rovib.cpython-39-x86_64-linux-gnu.so
 test.ipynb
 rovib
+*.so
+*.mod
