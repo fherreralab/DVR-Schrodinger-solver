@@ -10,7 +10,7 @@ public :: use_rovib, dvr_radial, dunham, orthonormal_check
 
 CONTAINS
 
-subroutine use_rovib(rmin, rmax, step, mass, NMax, vmax)
+subroutine use_rovib(rmin, rmax, step, mass, NMax, vmax, mol)
 !-----------------------------------------------------------------------------------------------------------------	
 ! 	General program to calculate the rovibrational structure of a diatomic molecule
 !	in a given closed-shell electronic potential curve. E(v,J)
@@ -38,7 +38,7 @@ double precision, intent(in) :: rmin, rmax, step, Nmax
 double precision, intent(inout) :: mass
 integer, intent(in) :: vmax
 double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
-character :: mol*4
+character, intent(in) :: mol*4
 	
 ! Variables for LAPACK diagonalization
 double precision, allocatable :: WORK(:), A(:,:)
@@ -58,7 +58,7 @@ real*8 threejsymbol
 
 print*, 'Setting parameters for LiCs'
 
-mol = 'LiCs'
+! mol = 'LiCs'
 
 if ((rmax.gt.515.d0).or.(rmin.lt.4.d0)) stop 'Error: grid boundaries outside potential interval!'
 
