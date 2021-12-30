@@ -10,7 +10,7 @@ public :: use_rovib, dvr_radial, dunham, orthonormal_check
 
 CONTAINS
 
-subroutine use_rovib(rmin, rmax, step, mass, NMax, vmax, mol)
+subroutine use_rovib(rmin, rmax, step, mass, NMax, vmax)
 !-----------------------------------------------------------------------------------------------------------------	
 ! 	General program to calculate the rovibrational structure of a diatomic molecule
 !	in a given closed-shell electronic potential curve. E(v,J)
@@ -38,7 +38,7 @@ double precision, intent(in) :: rmin, rmax, step, Nmax
 double precision, intent(inout) :: mass
 integer, intent(in) :: vmax
 double precision, allocatable :: grid(:), potential(:), hamiltonian(:,:), eigenvalues(:), eigenvectors(:,:)
-character, intent(in) :: mol*4
+character(len=100), intent(in) :: mol
 	
 ! Variables for LAPACK diagonalization
 double precision, allocatable :: WORK(:), A(:,:)
@@ -76,7 +76,7 @@ NV = vmax + 1						! number of vibrational states (for truncation)
 
 print*, 'Reading potential energy curve'
 
-open(20,file=mol//'_PEC.in')
+open(20,file=trim(mol))
 
 mesh=0
 do
